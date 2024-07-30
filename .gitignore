@@ -1,0 +1,21 @@
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+**/*.metadata
+**/*.iml
+target/
+.mvn/
+logs/
+### IntelliJ IDEA ###
+.idea
+.jpb
+*.iws
+*.iml
+*.ipr
+/mvnw
+/mvnw.cmd
+src/main/resources/application-prod.yml
+src/main/resources/application-test.yml
+src/main/resources/*.sql
+/files/

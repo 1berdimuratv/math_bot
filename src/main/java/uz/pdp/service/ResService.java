@@ -1,28 +1,44 @@
 package uz.pdp.service;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import uz.pdp.model.OrderProduct;
+import uz.pdp.bot.BotProperty;
+import uz.pdp.model.Question;
 import uz.pdp.model.User;
+import uz.pdp.model.enams.Lang;
 import uz.pdp.utils.GlobalVar;
 import uz.pdp.utils.MessageKey;
-
-import java.util.List;
 
 @Slf4j
 public class ResService {
     private static final I18nService i18n = I18nService.getInstance();
-    private static final Long me = -1002230976015L;   //-4266295619L;
+    private static final String feedback = """
+                #FIKR_ОТЗЫВ
+                
+                F.I.O. : %s
+                Habar/Соощение : %s
+                """;
+    private static final String question = """
+                #SAVOL_ВОПРОС
+                
+                ID : %s
+                F.I.O. : %s
+                Savol/Вопрос : %s
+                """;
+    private static final String answer = """
+                #JAVOB
+                
+                Savol/Вопрос : %s
+                
+                Agar qo'shimcha savollaringiz bo'lsa yoki boshqa biror narsa
+                bo'yicha yordam kerak bo'lsa, @berdimuratvs_bot bilan
+                bog'laning!☺️
+                """;
     public static void sendMsg(String text, ReplyKeyboard replyKeyboard) {
         try {
                 GlobalVar.getMyBot().execute(
@@ -53,13 +69,9 @@ public class ResService {
     public static void sendMsg(String text) {
         sendSimpleMsg(GlobalVar.getUSER().getChatId(), text);
     }
-    public static void sendFeedback(String feedback,String userFIO, String userPhone) {
-        String text = """
-                FIO : %s
-                Number : %s
-                Feedback : %s
-                """.formatted(userFIO,userPhone,feedback);
-        sendSimpleMsg(me, text);
+    public static void sendFeedback(String feedbackObj,String userFIO, String userPhone) {
+        String text = feedback.formatted(userFIO,feedbackObj);
+        sendSimpleMsg(BotProperty.TEACHERS, text);
     }
     public static void sendMsg( MessageKey text) {
         sendSimpleMsg(GlobalVar.getUSER().getChatId(), i18n.getMsg(text));
@@ -67,74 +79,39 @@ public class ResService {
     public static void sendErrorMsg() {
         sendMsg("Error!!");
     }
+    public static void sendErrorMsgForTeachers() {
+        sendSimpleMsg(BotProperty.TEACHERS,"Error!!");
+    }
 
 
     public static void sendMsg( MessageKey key, ReplyKeyboard replyKeyboard) {
         sendMsg(i18n.getMsg(key), replyKeyboard);
     }
 
-
-
-    public static void sendPhoto(MessageKey key, ReplyKeyboard replyKeyboard, InputFile inputFile) {
-        try {
-            GlobalVar.getMyBot().execute(
-                    SendPhoto.builder()
-                            .chatId(GlobalVar.getUSER().getChatId())
-                            .caption(i18n.getMsg(key))
-                            .photo(inputFile)
-                            .replyMarkup(replyKeyboard)
-                            .build()
-            );
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
-    }public static void sendPhoto(Long chatId, String card, ReplyKeyboard replyKeyboard, InputFile inputFile) {
-        try {
-            GlobalVar.getMyBot().execute(
-                    SendPhoto.builder()
-                            .chatId(chatId)
-                            .caption(card)
-                            .photo(inputFile)
-                            .replyMarkup(replyKeyboard)
-                            .build()
-            );
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
-    }
-    public static void changeButtons(Long chatId, ReplyKeyboard replyKeyboard){
-        try {
-            GlobalVar.getMyBot().execute(
-                    SendMessage.builder()
-                            .chatId(chatId)
-                            .replyMarkup(replyKeyboard)
-                            .build()
-            );
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    public static void sendOrderRequest(String s) {
+    public static void sendQuestion(Question questionObj,User user) {
+        StringBuilder res = new StringBuilder();
+        Lang lang = user.getLang();
+        String s = question.formatted(questionObj.getId(),user.getFio(),questionObj.getBody())+" \n";
         try {
             SendMessage build = SendMessage.builder()
                     .text(s)
-                    .chatId(me)
+                    .chatId(BotProperty.TEACHERS)
                     .build();
             GlobalVar.getMyBot().execute(build);
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
     }
-    public static void getLocation(String s, ReplyKeyboardMarkup replyKeyboard) {
-        Long chatId = GlobalVar.getUSER().getChatId();
-        try {
-            GlobalVar.getMyBot().execute(
-                    SendMessage.builder()
-                            .chatId(chatId)
-                            .replyMarkup(replyKeyboard)
-                            .build()
-            );
+    public static void forwardAnswerAndQuestion(String questionObj,String videoId) {
+        InputFile video = new InputFile(videoId);
+        String caption = answer.formatted(questionObj);
+        try{
+            SendVideo build = SendVideo.builder()
+                    .chatId(BotProperty.CHANEL)
+                    .video(video)
+                    .caption(caption)
+                    .build();
+            GlobalVar.getMyBot().execute(build);
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }

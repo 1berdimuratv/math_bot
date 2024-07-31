@@ -10,16 +10,11 @@ public enum UserState {
     CHOOSE_LANGUAGE(2),
     USERS_FIO(3),
     MAIN_MENU(4),
-    CHANG_NUM(5),
     CHANG_NAM(6),
     MENU(7),
     ORDERS(8),
     FEEDBACK(9),
-    SETTINGS(10),
-    ORDERING(11),
-    CHOOSING_AMOUNT(12),
-    WRITE_LOCATION(13),
-    SHARE_LOCATION(14);
+    SETTINGS(10);
 
     private final int step;
 

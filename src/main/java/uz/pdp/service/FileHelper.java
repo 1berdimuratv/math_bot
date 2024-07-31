@@ -14,14 +14,11 @@ import java.util.List;
 public class FileHelper {
     static {
         File file = Path.of(FileUrls.USER_URL).toFile();
-        File file2 = Path.of(FileUrls.ORDER_PRODUCT_URL).toFile();
-        File file3 = Path.of(FileUrls.ORDER_URL).toFile();
+        File file3 = Path.of(FileUrls.QUESTIONS_URL).toFile();
         try {
             file.delete();
-            file2.delete();
             file3.delete();
             file.createNewFile();
-            file2.createNewFile();
             file3.createNewFile();
         } catch (IOException e) {
             throw new RuntimeException(e);

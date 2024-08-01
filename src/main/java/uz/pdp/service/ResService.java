@@ -2,6 +2,7 @@ package uz.pdp.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -69,7 +70,7 @@ public class ResService {
     public static void sendMsg(String text) {
         sendSimpleMsg(GlobalVar.getUSER().getChatId(), text);
     }
-    public static void sendFeedback(String feedbackObj,String userFIO, String userPhone) {
+    public static void sendFeedback(String feedbackObj,String userFIO) {
         String text = feedback.formatted(userFIO,feedbackObj);
         sendSimpleMsg(BotProperty.TEACHERS, text);
     }
@@ -102,18 +103,31 @@ public class ResService {
             log.error(e.getMessage());
         }
     }
-    public static void forwardAnswerAndQuestion(String questionObj,String videoId) {
-        InputFile video = new InputFile(videoId);
+    public static void forwardFile(String questionObj,String file, boolean isVideo) {
+        InputFile inputFile = new InputFile(file);
         String caption = answer.formatted(questionObj);
-        try{
-            SendVideo build = SendVideo.builder()
-                    .chatId(BotProperty.CHANEL)
-                    .video(video)
-                    .caption(caption)
-                    .build();
-            GlobalVar.getMyBot().execute(build);
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
+        if (isVideo) {
+            try {
+                SendVideo build = SendVideo.builder()
+                        .chatId(BotProperty.CHANEL)
+                        .video(inputFile)
+                        .caption(caption)
+                        .build();
+                GlobalVar.getMyBot().execute(build);
+            } catch (TelegramApiException e) {
+                log.error(e.getMessage());
+            }
+        }else {
+            try {
+                SendPhoto build = SendPhoto.builder()
+                        .chatId(BotProperty.CHANEL)
+                        .photo(inputFile)
+                        .caption(caption)
+                        .build();
+                GlobalVar.getMyBot().execute(build);
+            } catch (TelegramApiException e) {
+                log.error(e.getMessage());
+            }
         }
     }
 

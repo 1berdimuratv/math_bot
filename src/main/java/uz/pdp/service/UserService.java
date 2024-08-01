@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.pdp.model.*;
 import uz.pdp.model.enams.Lang;
 import uz.pdp.model.enams.UserState;
+import uz.pdp.repository.UserRepository;
 import uz.pdp.utils.CoreUtils;
 import uz.pdp.utils.GlobalVar;
 
@@ -21,8 +22,6 @@ public class UserService {
     @Getter
     private static final UserService instance = new UserService();
     private final UserRepository userRepository = UserRepository.getInstance();
-    private final CategoryService categoryService = CategoryService.getInstance();
-    private final ProductService productService = ProductService.getInstance();
     private final QuestionService questionService = QuestionService.getInstance();
     private static I18nService i18n = I18nService.getInstance();
     private UserService(){}
@@ -35,14 +34,13 @@ public class UserService {
         userRepository.update(user.getChatId(),user);
         switch (user.getUserState()){
             case MENU -> {
-                List<Category> all = categoryService.findAll(user.getLang());
                 ResService.sendMsg(ORDER_MENU,ButtonService.back());
             }
             case FEEDBACK -> {
                 ResService.sendMsg(ASK_OPINION,ButtonService.back());
             }
             case SETTINGS -> {
-                ResService.sendMsg(SETTINGS,ButtonService.settings(user.getFio(),user.getPhoneNumber()));
+                ResService.sendMsg(SETTINGS,ButtonService.settings(user.getFio()));
             }
         }
     }
@@ -73,7 +71,7 @@ public class UserService {
         if (Objects.equals(text,i18n.getMsg(BACK)))
             ResService.sendMsg(MAIN_MENU, ButtonService.mainMenu());
         else {
-            ResService.sendFeedback(text,user.getFio(),user.getPhoneNumber());
+            ResService.sendFeedback(text,user.getFio());
             ResService.sendMsg(TAKE_OPINION,ButtonService.mainMenu());
         }
         user.setUserState(UserState.MAIN_MENU);
@@ -163,7 +161,7 @@ public class UserService {
             user.setUserState(UserState.SETTINGS);
             userRepository.update(user.getChatId(),user);
             ResService.sendMsg(SUCCESSFUL);
-            ResService.sendMsg(SETTINGS, ButtonService.settings(user.getFio(),user.getPhoneNumber()));
+            ResService.sendMsg(SETTINGS, ButtonService.settings(user.getFio()));
             return;
         }
         user.setUserState(UserState.USERS_FIO);
@@ -186,8 +184,6 @@ public class UserService {
         String text = message.getText();
         if (Objects.equals(text,i18n.getMsg(MENU))){
             user.setUserState(UserState.MENU);
-        }else if (Objects.equals(text,i18n.getMsg(ORDERS))){
-            user.setUserState(UserState.ORDERS);
         } else if (Objects.equals(text,i18n.getMsg(SETTINGS))) {
             user.setUserState(UserState.SETTINGS);
         } else if (Objects.equals(text,i18n.getMsg(FEEDBACK))) {
@@ -208,6 +204,6 @@ public class UserService {
         user.setUserState(UserState.SETTINGS);
         userRepository.update(user.getChatId(), user);
         ResService.sendMsg(SUCCESSFUL);
-        ResService.sendMsg(SETTINGS, ButtonService.settings(user.getFio(), user.getPhoneNumber()));
+        ResService.sendMsg(SETTINGS, ButtonService.settings(user.getFio()));
     }
 }

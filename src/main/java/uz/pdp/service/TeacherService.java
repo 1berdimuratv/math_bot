@@ -1,6 +1,7 @@
 package uz.pdp.service;
 
 import lombok.Getter;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import uz.pdp.model.Question;
 
@@ -13,11 +14,11 @@ public class TeacherService {
 
 
     public void forward(Update update) {
-
-        if (update.hasMessage()) {
+        Message message = update.getMessage();
+        if (update.hasMessage() && (message.hasVideo() || message.hasPhoto())) {
             Integer id;
             try {
-                id = Integer.parseInt(update.getMessage().getCaption());
+                id = Integer.parseInt(message.getCaption());
             }catch (Exception e) {
                 ResService.sendErrorMsgForTeachers();
                 return;
@@ -27,7 +28,11 @@ public class TeacherService {
                 ResService.sendErrorMsgForTeachers();
                 return;
             }
-            ResService.forwardAnswerAndQuestion(byId.getBody(), update.getMessage().getVideo().getFileId());
+            String fileId;
+            if (message.hasVideo())
+                ResService.forwardFile(byId.getBody(), message.getVideo().getFileId(), true);
+            else
+                ResService.forwardFile(byId.getBody(), message.getPhoto().get(message.getPhoto().size() - 1).getFileId(), false);
             questionService.delete(id);
         }
     }

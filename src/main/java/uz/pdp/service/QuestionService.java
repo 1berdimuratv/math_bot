@@ -11,8 +11,6 @@ public class QuestionService {
     private final static QuestionService instance = new QuestionService();
     private QuestionService(){}
     private final QuestionRepository questionsRepository = QuestionRepository.getInstance();
-    private final OrderProductRepository orderProductRepository = OrderProductRepository.getInstance();
-    private final ProductService productService = ProductService.getInstance();
     public Boolean addQuestion(Question question){
         questionsRepository.save(question);
         return Boolean.TRUE;

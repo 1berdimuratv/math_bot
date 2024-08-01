@@ -23,7 +23,7 @@ public class ButtonService {
         return finalCase(List.of(row1));
     }
 
-    public static ReplyKeyboardMarkup settings(String name,String number) {
+    public static ReplyKeyboardMarkup settings(String name) {
         List<KeyboardRow> rows = new ArrayList<>();
         KeyboardRow row1 = new KeyboardRow();
         KeyboardRow row2 = new KeyboardRow();
